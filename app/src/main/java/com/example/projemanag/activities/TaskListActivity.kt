@@ -62,6 +62,31 @@ class TaskListActivity : BaseActivity() {
     }
 
     fun addUpdateTaskListSuccess(){
+        hideProgressDialog()
+        showProgressDialog(resources.getString(R.string.please_wait))
         FirestoreClass().getBoardDetails(this,mBoardDetails.documentId)
+    }
+
+    fun createTaskList(taskListName : String){
+        val task = Task(taskListName,FirestoreClass().getUserID())
+        mBoardDetails.taskList.add(0,task)
+        mBoardDetails.taskList.removeAt(mBoardDetails.taskList.size-1)
+        showProgressDialog(resources.getString(R.string.please_wait))
+        FirestoreClass().addUpdateTaskList(this,mBoardDetails)
+    }
+
+    fun updateTaskList(taskListName : String,position:Int,model:Task){
+        val task = Task(taskListName,model.createdBy)
+        mBoardDetails.taskList[position]=task
+        mBoardDetails.taskList.removeAt(mBoardDetails.taskList.size-1)
+        showProgressDialog(resources.getString(R.string.please_wait))
+        FirestoreClass().addUpdateTaskList(this,mBoardDetails)
+    }
+
+    fun deleteTaskList(position:Int){
+        mBoardDetails.taskList.removeAt(position)
+        mBoardDetails.taskList.removeAt(mBoardDetails.taskList.size-1)
+        showProgressDialog(resources.getString(R.string.please_wait))
+        FirestoreClass().addUpdateTaskList(this,mBoardDetails)
     }
 }
