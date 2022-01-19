@@ -9,6 +9,7 @@ import android.view.View.inflate
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projemanag.R
 import com.example.projemanag.activities.TaskListActivity
@@ -84,6 +85,33 @@ open class TaskListItemsAdapter(private val context:Context,private var list:Arr
             holder.itemView.ib_delete_list.setOnClickListener {
                 deleteAlertDialog(position,model.title)
             }
+
+            holder.itemView.tv_add_card.setOnClickListener {
+                holder.itemView.cv_add_card.visibility = View.VISIBLE
+                holder.itemView.tv_add_card.visibility = View.GONE
+            }
+
+            holder.itemView.ib_close_card_name.setOnClickListener {
+                holder.itemView.cv_add_card.visibility = View.GONE
+                holder.itemView.tv_add_card.visibility = View.VISIBLE
+            }
+
+            holder.itemView.ib_done_card_name.setOnClickListener {
+                val cardName:String = holder.itemView.et_card_name.text.toString()
+                if(cardName.isNotEmpty()){
+                    if(context is TaskListActivity){
+                        context.addCardToTaskList(position,cardName)
+                    }
+                }else{
+                    Toast.makeText(context,"Please enter list name",Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            holder.itemView.rv_card_list.layoutManager = LinearLayoutManager(context)
+            holder.itemView.rv_card_list.setHasFixedSize(true)
+            val adapter = CardListItemsAdapter(context,model.cards)
+            holder.itemView.rv_card_list.adapter = adapter
+
         }
     }
 
