@@ -148,4 +148,24 @@ class FirestoreClass {
                 Log.e(activity.javaClass.simpleName,"Error while loading board: ",e)
             }
     }
+
+    fun getAssignedMembersArrayList(activity:MembersActivity,assignedTo:ArrayList<String>){
+        mFireStore.collection(Constants.USERS)
+            .whereIn(Constants.ID,assignedTo)
+            .get()
+            .addOnSuccessListener {
+                document->
+                Log.e(activity.javaClass.simpleName,document.documents.toString())
+                val userList:ArrayList<User> = ArrayList()
+
+                for(i in document){
+                    userList.add(i.toObject(User::class.java)!!)
+                }
+                activity.setupMembersList(userList)
+            }.addOnFailureListener {
+                e->
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName,"Error while getting members",e)
+            }
+    }
 }
