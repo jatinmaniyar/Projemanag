@@ -1,9 +1,14 @@
 package com.example.projemanag.activities
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.projemanag.R
@@ -14,10 +19,13 @@ import com.example.projemanag.models.User
 import com.example.projemanag.utils.Constants
 import kotlinx.android.synthetic.main.activity_members.*
 import kotlinx.android.synthetic.main.activity_task_list.*
+import kotlinx.android.synthetic.main.dialog_search_member.*
 
 class MembersActivity : BaseActivity() {
 
     private lateinit var mBoardDetails : Board
+    private lateinit var mAssignedMembersList : ArrayList<User>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +44,7 @@ class MembersActivity : BaseActivity() {
 
     fun setupMembersList(list : ArrayList<User>){
         hideProgressDialog()
+        mAssignedMembersList = list
         rv_members_list.layoutManager = LinearLayoutManager(this)
         rv_members_list.setHasFixedSize(true)
         val adapter = MemberListItemsAdapter(this,list)
@@ -51,5 +60,50 @@ class MembersActivity : BaseActivity() {
             actionBar.title = resources.getString(R.string.members)
         }
         toolbar_members_activity.setNavigationOnClickListener { onBackPressed() }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_add_member,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.action_add_member ->{
+                dialogSearchMember()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun memberDetails(user:User){
+        mBoardDetails.assignedTo.add(user.id)
+        FirestoreClass().assignMemberToBoard(this,mBoardDetails,user)
+    }
+
+    private fun dialogSearchMember(){
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_search_member)
+        dialog.tv_add.setOnClickListener {
+            val email = dialog.et_email_search_member.text.toString()
+            if(email.isNotEmpty()) {
+                dialog.dismiss()
+                showProgressDialog(resources.getString(R.string.please_wait))
+                FirestoreClass().getUserWithEmailId(this,email)
+            }else{
+                Toast.makeText(this,"Please enter an emial id",Toast.LENGTH_SHORT).show()
+            }
+        }
+        dialog.tv_cancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    fun memberAssignSuccess(user:User){
+        hideProgressDialog()
+        mAssignedMembersList.add(user)
+        setupMembersList(mAssignedMembersList)
     }
 }

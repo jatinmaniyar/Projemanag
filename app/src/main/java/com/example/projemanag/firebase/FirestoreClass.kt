@@ -168,4 +168,42 @@ class FirestoreClass {
                 Log.e(activity.javaClass.simpleName,"Error while getting members",e)
             }
     }
+
+    fun getUserWithEmailId(activity:MembersActivity
+                           ,email: String) {
+        mFireStore.collection(Constants.USERS)
+            .whereEqualTo(Constants.email,email)
+            .get()
+            .addOnSuccessListener {
+                document->
+                Log.e("USER WITH EMAIL ",document.documents.toString())
+                if(document.size()>0){
+                    val user:User = document.documents[0].toObject(User::class.java)!!
+                    activity.memberDetails(user)
+                }else{
+                    activity.hideProgressDialog()
+                    activity.showErrorSnackBar("Entered email id is not registered")
+                }
+            }.addOnFailureListener {
+                    e->
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName,"Error while getting members",e)
+            }
+    }
+
+    fun assignMemberToBoard(activity: MembersActivity,board:Board,user:User){
+        val assignedUserHaspMap = HashMap<String,Any>()
+        assignedUserHaspMap[Constants.ASSIGNED_TO] = board.assignedTo
+        mFireStore.collection(Constants.BOARDS)
+            .document(board.documentId)
+            .update(assignedUserHaspMap)
+            .addOnSuccessListener {
+                activity.memberAssignSuccess(user)
+            }.addOnFailureListener {
+                    e->
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName,"Error while updating assignedTo list ",e)
+            }
+    }
+
 }
