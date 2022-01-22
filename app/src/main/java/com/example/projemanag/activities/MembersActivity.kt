@@ -1,5 +1,6 @@
 package com.example.projemanag.activities
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Build
@@ -25,6 +26,7 @@ class MembersActivity : BaseActivity() {
 
     private lateinit var mBoardDetails : Board
     private lateinit var mAssignedMembersList : ArrayList<User>
+    private var newMemberAdded : Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +51,13 @@ class MembersActivity : BaseActivity() {
         rv_members_list.setHasFixedSize(true)
         val adapter = MemberListItemsAdapter(this,list)
         rv_members_list.adapter = adapter
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(newMemberAdded){
+            Activity.RESULT_OK
+        }
     }
 
     private fun setupActionBar(){
@@ -104,6 +113,7 @@ class MembersActivity : BaseActivity() {
     fun memberAssignSuccess(user:User){
         hideProgressDialog()
         mAssignedMembersList.add(user)
+        newMemberAdded = true
         setupMembersList(mAssignedMembersList)
     }
 }

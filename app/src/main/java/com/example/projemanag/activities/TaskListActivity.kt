@@ -1,9 +1,11 @@
 package com.example.projemanag.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -22,9 +24,13 @@ import kotlinx.android.synthetic.main.app_bar_main.*
 
 class TaskListActivity : BaseActivity() {
 
-    private lateinit var mBoardDetails : Board
+    companion object{
+        private const val MEMBER_REQUEST_CODE : Int = 13
+    }
 
+    private lateinit var mBoardDetails : Board
     private lateinit var mdocumentID : String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
@@ -51,10 +57,29 @@ class TaskListActivity : BaseActivity() {
             R.id.action_members ->{
                 val intent = Intent(this,MembersActivity::class.java)
                 intent.putExtra(Constants.BOARD_DETAIL,mBoardDetails)
-                startActivity(intent)
+                startActivityForResult(intent, MEMBER_REQUEST_CODE)
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == Activity.RESULT_OK && requestCode== MEMBER_REQUEST_CODE){
+            showProgressDialog(resources.getString(R.string.please_wait))
+            FirestoreClass().getBoardDetails(this,mdocumentID)
+        }else{
+            Log.e("Cancelled","Cancelled")
+        }
+    }
+
+    fun cardDetails(taskListPosition:Int,cardListPosition:Int){
+        val intent = Intent(this,CardDetailsActivity::class.java)
+        intent.putExtra(Constants.BOARDS,mBoardDetails)
+        intent.putExtra(Constants.TASK_LIST_ITEM_POSITION,taskListPosition)
+        intent.putExtra(Constants.CARD_LIST_ITEM_POSITION,cardListPosition)
+        startActivity(intent)
     }
 
     private fun setupActionBar(){
