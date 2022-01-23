@@ -26,6 +26,7 @@ class TaskListActivity : BaseActivity() {
 
     companion object{
         private const val MEMBER_REQUEST_CODE : Int = 13
+        private const val CARD_DETAILS_REQUEST_CODE : Int = 14
     }
 
     private lateinit var mBoardDetails : Board
@@ -66,7 +67,8 @@ class TaskListActivity : BaseActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode == Activity.RESULT_OK && requestCode== MEMBER_REQUEST_CODE){
+        if(resultCode == Activity.RESULT_OK && requestCode== MEMBER_REQUEST_CODE
+            || requestCode== CARD_DETAILS_REQUEST_CODE){
             showProgressDialog(resources.getString(R.string.please_wait))
             FirestoreClass().getBoardDetails(this,mdocumentID)
         }else{
@@ -79,7 +81,7 @@ class TaskListActivity : BaseActivity() {
         intent.putExtra(Constants.BOARDS,mBoardDetails)
         intent.putExtra(Constants.TASK_LIST_ITEM_POSITION,taskListPosition)
         intent.putExtra(Constants.CARD_LIST_ITEM_POSITION,cardListPosition)
-        startActivity(intent)
+        startActivityForResult(intent, CARD_DETAILS_REQUEST_CODE)
     }
 
     private fun setupActionBar(){

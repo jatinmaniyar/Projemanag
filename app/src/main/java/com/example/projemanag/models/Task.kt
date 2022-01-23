@@ -7,7 +7,7 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter.writeS
 data class Task(
     var title:String = "",
     var createdBy:String="",
-    val cards:ArrayList<Card> = ArrayList()
+    var cards:ArrayList<Card> = ArrayList()
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
