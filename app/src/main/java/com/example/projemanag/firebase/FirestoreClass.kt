@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import com.example.projemanag.activities.*
 import com.example.projemanag.models.Board
+import com.example.projemanag.models.Task
 import com.example.projemanag.models.User
 import com.example.projemanag.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
@@ -155,7 +156,7 @@ class FirestoreClass {
             }
     }
 
-    fun getAssignedMembersArrayList(activity:MembersActivity,assignedTo:ArrayList<String>){
+    fun getAssignedMembersArrayList(activity:Activity,assignedTo:ArrayList<String>){
         mFireStore.collection(Constants.USERS)
             .whereIn(Constants.ID,assignedTo)
             .get()
@@ -167,9 +168,13 @@ class FirestoreClass {
                 for(i in document){
                     userList.add(i.toObject(User::class.java)!!)
                 }
-                activity.setupMembersList(userList)
+                if(activity is MembersActivity)
+                    activity.setupMembersList(userList)
+                if(activity is TaskListActivity)
+                    activity.boardMemberDetails(userList)
             }.addOnFailureListener {
                 e->
+                if(activity is MembersActivity)
                 activity.hideProgressDialog()
                 Log.e(activity.javaClass.simpleName,"Error while getting members",e)
             }

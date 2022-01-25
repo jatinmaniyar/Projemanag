@@ -17,7 +17,9 @@ import com.example.projemanag.firebase.FirestoreClass
 import com.example.projemanag.models.Board
 import com.example.projemanag.models.Card
 import com.example.projemanag.models.Task
+import com.example.projemanag.models.User
 import com.example.projemanag.utils.Constants
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_create_board.*
 import kotlinx.android.synthetic.main.activity_task_list.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -31,6 +33,7 @@ class TaskListActivity : BaseActivity() {
 
     private lateinit var mBoardDetails : Board
     private lateinit var mdocumentID : String
+    private lateinit var mAssignedMembersList : ArrayList<User>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +84,7 @@ class TaskListActivity : BaseActivity() {
         intent.putExtra(Constants.BOARDS,mBoardDetails)
         intent.putExtra(Constants.TASK_LIST_ITEM_POSITION,taskListPosition)
         intent.putExtra(Constants.CARD_LIST_ITEM_POSITION,cardListPosition)
+        intent.putExtra(Constants.BOARD_MEMBERS_LIST,mAssignedMembersList)
         startActivityForResult(intent, CARD_DETAILS_REQUEST_CODE)
     }
 
@@ -106,6 +110,9 @@ class TaskListActivity : BaseActivity() {
 
         val adapter = TaskListItemsAdapter(this,board.taskList)
         rv_task_list.adapter = adapter
+
+        showProgressDialog(resources.getString(R.string.please_wait))
+        FirestoreClass().getAssignedMembersArrayList(this,mBoardDetails.assignedTo)
     }
 
     fun addUpdateTaskListSuccess(){
@@ -150,6 +157,10 @@ class TaskListActivity : BaseActivity() {
         mBoardDetails.taskList[position] = task
         showProgressDialog(resources.getString(R.string.please_wait))
         FirestoreClass().addUpdateTaskList(this,mBoardDetails)
+    }
 
+    fun boardMemberDetails(list : ArrayList<User>){
+        mAssignedMembersList = list
+        hideProgressDialog()
     }
 }
