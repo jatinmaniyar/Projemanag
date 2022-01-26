@@ -25,6 +25,7 @@ abstract class LabelColorListDialog(
         setContentView(view)
         setCanceledOnTouchOutside(true)
         setCancelable(true)
+        setupRecyclerView(view)
     }
 
     private fun setupRecyclerView(view: View){
