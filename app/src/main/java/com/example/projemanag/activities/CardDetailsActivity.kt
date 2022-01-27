@@ -2,6 +2,7 @@ package com.example.projemanag.activities
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,9 @@ import com.projemanag.dialogs.MembersListDialog
 import com.projemanag.model.SelectedMembers
 import kotlinx.android.synthetic.main.activity_card_details.*
 import kotlinx.android.synthetic.main.activity_task_list.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CardDetailsActivity : BaseActivity() {
 
@@ -34,6 +38,7 @@ class CardDetailsActivity : BaseActivity() {
     private var mTaskListPosition = -1
     private var mCardListPosition = -1
     private var mSelectedColor = ""
+    private var mSelectedDueDateMilliSeconds: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +68,18 @@ class CardDetailsActivity : BaseActivity() {
         }
 
         setupSelectedMembersList()
+
+        mSelectedDueDateMilliSeconds = mBoardDetails.taskList[mTaskListPosition].cards[mCardListPosition]
+            .dueDate
+        if(mSelectedDueDateMilliSeconds>0){
+            val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy",Locale.ENGLISH)
+            val selectedDate = simpleDateFormat.format(Date(mSelectedDueDateMilliSeconds))
+            tv_select_due_date.text =selectedDate
+        }
+
+        tv_select_due_date.setOnClickListener{
+            showDataPicker()
+        }
     }
 
     private fun setupActionBar(){
@@ -166,7 +183,8 @@ class CardDetailsActivity : BaseActivity() {
         val card = Card(et_name_card_details.text.toString(),
         mBoardDetails.taskList[mTaskListPosition].cards[mCardListPosition].createdBy,
             mBoardDetails.taskList[mTaskListPosition].cards[mCardListPosition].assignedTo,
-            mSelectedColor
+            mSelectedColor,
+            mSelectedDueDateMilliSeconds
         )
         val taskList :ArrayList<Task> =mBoardDetails.taskList
         taskList.removeAt(taskList.size-1)
@@ -253,7 +271,7 @@ class CardDetailsActivity : BaseActivity() {
             rv_selected_members_list.visibility = View.VISIBLE
 
             rv_selected_members_list.layoutManager = GridLayoutManager(this@CardDetailsActivity, 6)
-            val adapter = CardMemberListItemsAdapter(this@CardDetailsActivity, selectedMembersList)
+            val adapter = CardMemberListItemsAdapter(this@CardDetailsActivity, selectedMembersList,true)
             rv_selected_members_list.adapter = adapter
             adapter.setOnClickListener(object :
                 CardMemberListItemsAdapter.OnClickListener {
@@ -265,5 +283,32 @@ class CardDetailsActivity : BaseActivity() {
             tv_select_members.visibility = View.VISIBLE
             rv_selected_members_list.visibility = View.GONE
         }
+    }
+
+    private fun showDataPicker() {
+        val c = Calendar.getInstance()
+        val year =
+            c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        val dpd = DatePickerDialog(
+            this,
+            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                val sDayOfMonth = if (dayOfMonth < 10) "0$dayOfMonth" else "$dayOfMonth"
+                val sMonthOfYear =
+                    if ((monthOfYear + 1) < 10) "0${monthOfYear + 1}" else "${monthOfYear + 1}"
+                val selectedDate = "$sDayOfMonth/$sMonthOfYear/$year"
+                tv_select_due_date.text = selectedDate
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+                val theDate = sdf.parse(selectedDate)
+
+                mSelectedDueDateMilliSeconds = theDate!!.time
+            },
+            year,
+            month,
+            day
+        )
+        dpd.show()
     }
 }
